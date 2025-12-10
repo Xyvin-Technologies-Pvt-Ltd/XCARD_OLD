@@ -37,5 +37,8 @@
     "winston": "^3.13.0",
     "xcard-backend": "file:",
     "xlsx": "^0.18.5"
+  },
+  "directories": {
+    "doc": "docs"
   }
 }
