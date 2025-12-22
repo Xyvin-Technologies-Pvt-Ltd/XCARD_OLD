@@ -80,16 +80,28 @@ header{
   object-fit: cover;
 }
 
+.avatar_section {
+  position: relative;
+  padding: 20px;
+  margin-top: -40px; /* Less overlap with background */
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  min-height: 100px;
+  background-color: #fff; /* White background to separate from image */
+  border-radius: 12px 12px 0 0; /* Rounded top corners */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
 .user_info {
-  width: 100%;
-  height: fit-content;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex-wrap: wrap;
-  align-items: center;
-  position: relative;
-  top: calc(-1 * var(--avatar-size) / 2 - 10px);
+  justify-content: center;
+  min-height: 80px;
+  padding-top: 10px; /* Reduced since we have white background now */
 }
+
 .avatar_img {
   width: calc(var(--avatar-size) + 2px);
   height: calc(var(--avatar-size) + 2px);
@@ -98,29 +110,33 @@ header{
   align-items: center;
   background-color: var(--bg-clr);
   border-radius: 50%;
-  margin-top: -3rem;
-  margin-left: 1rem;
-  
+  flex-shrink: 0; /* Prevent avatar from shrinking */
 }
+
 .avatar {
   width: var(--avatar-size);
   height: var(--avatar-size);
   border-radius: inherit;
   object-fit: cover;
 }
+
 .user_name {
   font-size: 24px;
   font-style: normal;
   font-weight: 600;
   color: #000;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  margin: 0;
+  padding: 0;
 }
-.user_name_section{
-  margin-top: 0.5rem;
-  gap: 10px;
-  margin-left: calc(var(--avatar-size) + 30px);
 
-  margin-right:10px;
-
+.user_name_section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .rating{
 
@@ -1002,6 +1018,26 @@ footer {
 @media(max-width:375px){
   .contact_cards{
       grid-template-columns: repeat(4,1fr);
+  }
+  
+  .user_name {
+    font-size: 20px; /* Smaller font on small screens */
+  }
+  
+  .avatar_section {
+    padding: 0 15px; /* Less padding on small screens */
+    gap: 10px;
+  }
+}
+
+@media(max-width:320px){
+  .user_name {
+    font-size: 18px; /* Even smaller font on very small screens */
+  }
+  
+  .avatar_section {
+    padding: 0 10px;
+    gap: 8px;
   }
 }
 /* .whatsapp-btn { */
