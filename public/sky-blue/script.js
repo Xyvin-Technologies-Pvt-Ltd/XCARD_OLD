@@ -530,19 +530,14 @@ function generateSocials() {
       if (!large.includes(social.type)) {
         const icon = `/profile/public/sky-blue/assets/orange-dark/socials/${contactCardImg(social.type)}`;
   const isApp = social.type === 'appstore' || social.type === 'googleplay';
-  // Friendly title mapping
+  // Friendly title mapping - always use the type/title
   let title = isApp ? (social.type === 'appstore' ? 'App Store' : 'Google Play') : social.type;
   if (social.type === 'google') title = 'Google Review';
-        const hasLabel = typeof social.label === 'string' && social.label.trim() !== '';
-        const normalizedLabel = (social.label || '').trim().toLowerCase();
-        const normalizedTitle = String(title || '').trim().toLowerCase();
-        const isDuplicate = hasLabel && normalizedLabel === normalizedTitle;
-        const displayText = hasLabel && !isDuplicate ? (isApp ? social.label : `@${social.label}`) : title;
         card.innerHTML = `
       <a target="_blank" href="${social.value}">
       <img src="${icon}" alt="${social.type}" />
       <div>
-        <p class="userid">${displayText}</p>
+        <p class="userid">${title}</p>
       </div>
     </a>
       `;

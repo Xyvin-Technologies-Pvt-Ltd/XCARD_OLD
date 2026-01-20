@@ -635,18 +635,14 @@ function buildSocialCardInnerHTML(social){
     : social.type;
   // If type is 'google' we want to display a more friendly label
   const displayType = social.type === 'google' ? 'Google Review' : title;
-  const hasLabel = typeof social.label === 'string' && social.label.trim() !== '';
+  const hasLabel = typeof social.label === 'string' && social.label.trim() !== '' && social.label.toLowerCase() !== 'social media';
   const normalizedLabel = (social.label || '').trim().toLowerCase();
   const normalizedTitle = String(title || '').trim().toLowerCase();
   const isDuplicate = hasLabel && normalizedLabel === normalizedTitle;
 
   // Choose a single display line:
-  // - Prefer label (with @ for non-app) when present and not duplicate
-  // - Otherwise show title/type
+  // - Always use the type/title as the display (cleaner, more consistent)
   let displayText = displayType;
-  if (hasLabel && !isDuplicate) {
-    displayText = isApp ? social.label : `@${social.label}`;
-  }
   return `
       <a target="_blank" href="${social.value}">
       ${iconHtml}

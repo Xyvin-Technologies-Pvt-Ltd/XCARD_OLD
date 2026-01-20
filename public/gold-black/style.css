@@ -197,6 +197,12 @@ body{
     place-items:center;
     gap: 20px;
 }
+.contact_card_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
 .contact_card{
     width: 55px;
     height: 55px;
@@ -212,6 +218,16 @@ body{
 .contact_card img, .contact_card i { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
 .contact_card:hover{
     box-shadow: var(--card-box-shadow);
+}
+.contact_label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-gradient);
+    text-align: center;
+    margin: 0;
+    max-width: 60px;
+    word-wrap: break-word;
+    line-height: 1.2;
 }
 
 .contact_long_cards{

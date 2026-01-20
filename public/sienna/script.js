@@ -325,14 +325,19 @@ const showAwardPopup = (heading, description, imageUrl) => {
 };
 
 function generateContactCard(link, label) {
+  const originalLabel = label;
   const titleAttr = String(label).toLowerCase() === 'google' ? ' title="Google Review" aria-label="Google Review"' : '';
+  const displayLabel = friendlyLabelFor(String(label).toLowerCase(), originalLabel);
   return `
-      <div class="contact_card">
-          <a style="display: flex;align-content: center;justify-content: center;" href=${link}${titleAttr}>
-              <img src="/profile/public/sienna/assets/icons/${contactCardImg(
-                label
-              )}" alt="">
-          </a>
+      <div class="contact_card_container">
+          <div class="contact_card">
+              <a style="display: flex;align-content: center;justify-content: center;" href=${link}${titleAttr}>
+                  <img src="/profile/public/sienna/assets/icons/${contactCardImg(
+                    label
+                  )}" alt="">
+              </a>
+          </div>
+          <p class="contact_label">${displayLabel}</p>
       </div>
   `;
 }

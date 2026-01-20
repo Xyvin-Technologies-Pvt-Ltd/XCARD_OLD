@@ -291,44 +291,64 @@ if (socialMedia && Array.isArray(socialMedia.socials)) {
   for (const social of socialMedia.socials) {
     if (social.value !== '') {
       let iconClass = '';
+      let displayLabel = social.type;
+      
       switch (social.type) {
         case 'instagram':
           iconClass = 'fa-brands fa-instagram ins';
+          displayLabel = 'Instagram';
           break;
         case 'linkedin':
           iconClass = 'fa-brands fa-linkedin-in';
+          displayLabel = 'LinkedIn';
           break;
         case 'twitter':
           iconClass = 'fa-brands fa-twitter';
+          displayLabel = 'Twitter';
+          break;
+        case 'x':
+          iconClass = 'fa-brands fa-x-twitter';
+          displayLabel = 'X';
           break;
         case 'facebook':
           iconClass = 'fa-brands fa-facebook';
+          displayLabel = 'Facebook';
           break;
         case 'spotify':
           iconClass = 'fa-brands fa-spotify';
+          displayLabel = 'Spotify';
           break;
         case 'medium':
           iconClass = 'fa-brands fa-medium';
+          displayLabel = 'Medium';
           break;
         case 'youtube':
           iconClass = 'fa-brands fa-youtube';
+          displayLabel = 'YouTube';
           break;
         case 'github':
           iconClass = 'fa-brands fa-github';
+          displayLabel = 'GitHub';
           break;
         case 'behance':
           iconClass = 'fa-brands fa-behance';
+          displayLabel = 'Behance';
           break;
         case 'dribble':
           iconClass = 'fa-brands fa fa-dribbble';
+          displayLabel = 'Dribbble';
           break;
         default:
           iconClass = 'fa-solid fa-link';
+          displayLabel = social.type;
       }
       socialMediaHTML += `
-        <a href="${social.value}" class="image sm-icons">
-          <i class="${iconClass}"></i>
-        </a>
+        <div class="sm-card-container">
+          <a href="${social.value}" class="image sm-icons">
+            <i class="${iconClass}"></i>
+          </a>
+          <p class="sm-label">${displayLabel}</p>
+        </div>
       `;
     }
   }

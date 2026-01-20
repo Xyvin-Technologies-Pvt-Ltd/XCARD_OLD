@@ -304,6 +304,7 @@ const showAwardPopup = (heading, description, imageUrl) => {
 
 function generateContactCard(link, label) {
   var cardImage;
+  const originalLabel = label;
   label = label.toLowerCase();
   if (label === 'googleplay') {
     cardImage = '<i class="bi bi-google-play app-icon"></i>';
@@ -350,11 +351,16 @@ function generateContactCard(link, label) {
     cardImage = '<i class="fa-solid fa-globe"></i>';
   }
 
+  const displayLabel = label === 'google' ? 'Google Review' : (label === 'appstore' ? 'App Store' : (label === 'googleplay' ? 'Google Play' : originalLabel));
+
   return `
-        <div class="contact_card">
-      <a href=${link}${label === 'google' ? ' title="Google Review" aria-label="Google Review"' : ''}>
-      ${cardImage}
-      </a>
+        <div class="contact_card_container">
+          <div class="contact_card">
+            <a href=${link}${label === 'google' ? ' title="Google Review" aria-label="Google Review"' : ''}>
+              ${cardImage}
+            </a>
+          </div>
+          <p class="contact_label">${displayLabel}</p>
         </div>
     `;
 }
