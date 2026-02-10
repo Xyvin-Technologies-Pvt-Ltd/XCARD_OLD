@@ -158,7 +158,7 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-function createVCard(
+function openNativeContactApp(
   websites,
   name,
   company,
@@ -189,29 +189,22 @@ function createVCard(
     `EMAIL;TYPE=WORK:${email ?? ''}`,
     `ORG:${company ?? ''}`,
     `TITLE:${designation ?? ''}`,
-    `ADR;TYPE=WORK:;;${
-      locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
-    };${locationInfo.pincode ?? ''}`,
+    `ADR;TYPE=WORK:;;${locationInfo?.value?.replace(/\n/g, ';') ?? locationInfo?.street ?? ''
+    };${locationInfo?.pincode ?? ''}`,
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp ?? ''}`,
     ...newSocials,
     'END:VCARD',
   ].join('\n');
 
-  const blob = new Blob([vcardData], { type: 'text/vcard' });
-  const url = URL.createObjectURL(blob);
+  // Create a data URI with the vCard data
+  const vcardDataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcardData);
 
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `${name}.vcf`;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-
-  // Release the object URL after the download has started
-  URL.revokeObjectURL(url);
+  // Try to open the native contact app
+  // This will work on most mobile devices (iOS and Android)
+  window.location.href = vcardDataUri;
 }
 
 const sendHiToWhatsApp = (whatsapp, btn) => {
@@ -311,47 +304,47 @@ function generateContactCard(link, label) {
   } else if (label === 'appstore') {
     cardImage = '<i class="bi bi-apple app-icon"></i>';
   } else
-  if (label == 'email') {
-    cardImage = '<i class="fa-solid fa-at"></i>';
-  } else if (label == 'instagram') {
-    cardImage = '<i class="fa-brands fa-instagram"></i>';
-  } else if (label == 'whatsapp') {
-    cardImage = '<i class="fa-brands fa-whatsapp"></i>';
-  } else if (label == 'linkedin') {
-    cardImage = '<i class="fa-brands fa-linkedin"></i>';
-  } else if (label == 'facebook') {
-    cardImage = '<i class="fa-brands fa-facebook"></i>';
-  } else if (label == 'x' || label == 'twitter') {
-    cardImage = '<i class="fa-brands fa-x-twitter"></i>';
-  } else if (label == 'dribble') {
-    cardImage = '<i class="fa-brands fa-dribbble"></i>';
-  } else if (label == 'phone') {
-    cardImage = '<i class="fa-solid fa-phone"></i>';
-  } else if (label == 'whatsapp-business') {
-    cardImage = '<img src="/profile/public/blue-black/assets/icons/wp_b.svg">';
-  } else if (label == 'youtube') {
-    cardImage = '<i class="fa-brands fa-youtube"></i>';
-  } else if (label == 'snapchat') {
-    cardImage = '<i class="fa-brands fa-snapchat"></i>';
-  } else if (label == 'pinterest') {
-    cardImage = '<i class="fa-brands fa-pinterest"></i>';
-  } else if (label == 'github') {
-    cardImage = '<i class="fa-brands fa-github"></i>';
-  } else if (label == 'discord') {
-    cardImage = '<i class="fa-brands fa-discord"></i>';
-  } else if (label == 'tiktok') {
-    cardImage = '<i class="fa-brands fa-tiktok"></i>';
-  } else if (label == 'telegram') {
-    cardImage = '<i class="fa-brands fa-telegram"></i>';
-  } else if (label == 'spotify') {
-    cardImage = '<i class="fa-brands fa-spotify"></i>';
-  } else if (label == 'threads') {
-    cardImage = '<i class="fa-brands fa-threads"></i>';
-  } else {
-    cardImage = '<i class="fa-solid fa-globe"></i>';
-  }
+    if (label == 'email') {
+      cardImage = '<i class="fa-solid fa-at"></i>';
+    } else if (label == 'instagram') {
+      cardImage = '<i class="fa-brands fa-instagram"></i>';
+    } else if (label == 'whatsapp') {
+      cardImage = '<i class="fa-brands fa-whatsapp"></i>';
+    } else if (label == 'linkedin') {
+      cardImage = '<i class="fa-brands fa-linkedin"></i>';
+    } else if (label == 'facebook') {
+      cardImage = '<i class="fa-brands fa-facebook"></i>';
+    } else if (label == 'x' || label == 'twitter') {
+      cardImage = '<i class="fa-brands fa-x-twitter"></i>';
+    } else if (label == 'dribble') {
+      cardImage = '<i class="fa-brands fa-dribbble"></i>';
+    } else if (label == 'phone') {
+      cardImage = '<i class="fa-solid fa-phone"></i>';
+    } else if (label == 'whatsapp-business') {
+      cardImage = '<img src="/profile/public/blue-black/assets/icons/wp_b.svg">';
+    } else if (label == 'youtube') {
+      cardImage = '<i class="fa-brands fa-youtube"></i>';
+    } else if (label == 'snapchat') {
+      cardImage = '<i class="fa-brands fa-snapchat"></i>';
+    } else if (label == 'pinterest') {
+      cardImage = '<i class="fa-brands fa-pinterest"></i>';
+    } else if (label == 'github') {
+      cardImage = '<i class="fa-brands fa-github"></i>';
+    } else if (label == 'discord') {
+      cardImage = '<i class="fa-brands fa-discord"></i>';
+    } else if (label == 'tiktok') {
+      cardImage = '<i class="fa-brands fa-tiktok"></i>';
+    } else if (label == 'telegram') {
+      cardImage = '<i class="fa-brands fa-telegram"></i>';
+    } else if (label == 'spotify') {
+      cardImage = '<i class="fa-brands fa-spotify"></i>';
+    } else if (label == 'threads') {
+      cardImage = '<i class="fa-brands fa-threads"></i>';
+    } else {
+      cardImage = '<i class="fa-solid fa-globe"></i>';
+    }
 
-  const displayLabel = buildSocialDisplayLabel({label: originalLabel, type: label});
+  const displayLabel = buildSocialDisplayLabel({ label: originalLabel, type: label });
 
   return `
         <div class="contact_card_container">
@@ -364,6 +357,8 @@ function generateContactCard(link, label) {
         </div>
     `;
 }
+
+function buildSocialDisplayLabel(social) {
   const lower = String(social.type || social).toLowerCase();
   if (lower === 'google') return 'Google Review';
   if (lower === 'appstore') return 'App Store';
@@ -371,7 +366,7 @@ function generateContactCard(link, label) {
   return social.label && social.label.trim() !== '' ? social.label : social.type || social;
 }
 
-function buildIconTitleAttr(social){
+function buildIconTitleAttr(social) {
   const type = typeof social === 'string' ? social : social.type;
   return String(type).toLowerCase() === 'google' ? ' title="Google Review" aria-label="Google Review"' : '';
 }
@@ -386,9 +381,8 @@ function generateContactMeLabel(status) {
     return '';
   }
   return `
-            <h4 id="contact_me_label" class="gradient_text sub_heading">${
-              data.contact.label ?? `Contact Me`
-            }</h4>
+            <h4 id="contact_me_label" class="gradient_text sub_heading">${data.contact.label ?? `Contact Me`
+    }</h4>
         `;
 }
 
@@ -486,12 +480,10 @@ function generateProductCard(
             <div class="product_details">
                 <div class="product_name">${productName}</div>
                 <div class="product_price">
-                    <p class="fake_price f_16 fw_400">${
-                      fakePrice === null ? '' : `${fakePrice}`
-                    }</p>
-                    <p class="orginal_price f_16 fw_600">${
-                      originalPrice === null ? '' : `${originalPrice}`
-                    }</p>
+                    <p class="fake_price f_16 fw_400">${fakePrice === null ? '' : `${fakePrice}`
+    }</p>
+                    <p class="orginal_price f_16 fw_600">${originalPrice === null ? '' : `${originalPrice}`
+    }</p>
                 </div>
             </div>
         </div>
@@ -506,9 +498,9 @@ function createServiceCard(serviceName, serviceDescription, imageUrl, link) {
   card.classList.add('slider_service_card');
   card.innerHTML = `
         <img class="service_img" src="${handleImage(
-          imageUrl,
-          service_no_img
-        )}" alt="${serviceName}">
+    imageUrl,
+    service_no_img
+  )}" alt="${serviceName}">
         <div class="service_details">
             <h4 class="fw_600 f_16 service_heading">${serviceName}</h4>
             <p class="fw_400 f_14 service_desc">${service_desc}</p>
@@ -536,9 +528,9 @@ function generateAwardCard(awardTitle, organizationName, imageUrl) {
     award_no_img
   )}')" class="award_card">
             <img class="award_img" src="${handleImage(
-              imageUrl,
-              award_no_img
-            )}" alt="product">
+    imageUrl,
+    award_no_img
+  )}" alt="product">
             <div class="product_details">
                 <h5 class="fw_600 f_16 award_title">${awardTitle}</h5>
                 <p class="fw_400 f_16 award_organisation">${organizationName}</p>
@@ -567,11 +559,10 @@ function generateDocumentCard(doc) {
                 <img src="/profile/public/blue-black/assets/icons/document.svg" alt="file">
                 <p class="document_name fw_400 f_14">${documentName}</p>
             </div>
-            <button class="btn" onclick="${
-              isViewableData
-                ? `viewDocument('${data.public}')`
-                : `downloadDocument('${data.public}', '${data.fileName}', '${data.mimeType}')`
-            }">
+            <button class="btn" onclick="${isViewableData
+      ? `viewDocument('${data.public}')`
+      : `downloadDocument('${data.public}', '${data.fileName}', '${data.mimeType}')`
+    }">
                 <img src="/profile/public/blue-black/assets/icons/${icon}" alt="download">
             </button>
         </div>
@@ -584,9 +575,9 @@ function generateCertificateCard(certificateTitle, organizationName, imageUrl) {
   return `
         <div class="certificate_card">
             <img src="${handleImage(
-              imageUrl,
-              certificate_no_img
-            )}" alt="certificate">
+    imageUrl,
+    certificate_no_img
+  )}" alt="certificate">
             <h5 class="gradient_text fw_600 f_16">${certificateTitle}</h5>
             <p class="fw_400 f_16">${organizationName}</p>
         </div>
@@ -659,7 +650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // enquery form
   const enquiry_btn = document.getElementById('enquiry_btn');
   console.log(enquiry_btn);
-  
+
   // contact
   const save_contact = document.getElementById('save_contact');
   const lets_chat_btn = document.getElementById('chatButton');
@@ -672,7 +663,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if profile has the specific group ID and hide enquiry section
   if (data && data.group) {
     console.log('Profile Group ID:', data.group);
-    
+
     if (data.group === '689c7532d75d59a0d06966e3') {
       const enquirySection = document.querySelector('.enquiry_section');
       if (enquirySection) {
@@ -938,7 +929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   save_contact.addEventListener('click', () => {
-    createVCard(
+    openNativeContactApp(
       websites,
       name,
       company,

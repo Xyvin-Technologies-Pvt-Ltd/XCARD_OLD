@@ -222,18 +222,11 @@ const createVcard = () => {
     'END:VCARD',
   ].join('\n');
 
-  const blob = new Blob([vcardData], { type: 'text/vcard' });
-  const url = URL.createObjectURL(blob);
+  // Create a data URI with the vCard data
+  const vcardDataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcardData);
 
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `${personData.name}.vcf`;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-
-  // Release the object URL after the download has started
-  URL.revokeObjectURL(url);
+  // Open the native contact app (works on iOS and Android)
+  window.location.href = vcardDataUri;
 };
 
 const saveContactBtn = document.getElementById('save-contact');

@@ -166,7 +166,7 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-function createVCard(
+function openNativeContactApp(
   websites,
   name,
   company,
@@ -186,11 +186,7 @@ function createVCard(
     : [];
 
   const newSocials = Array.isArray(socials)
-    ? socials?.map((social) => {
-        if (social.type != 'phone' && social.type != 'email') {
-          return `URL:${social.value}`;
-        }
-      })
+    ? socials?.map((social) => `URL:${social.value}`)
     : [];
 
   const vcardData = [
@@ -201,29 +197,45 @@ function createVCard(
     `EMAIL;TYPE=WORK:${email ?? ''}`,
     `ORG:${company ?? ''}`,
     `TITLE:${designation ?? ''}`,
-    `ADR;TYPE=WORK:;;${
-      locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
-    };${locationInfo.pincode ?? ''}`,
+    `ADR;TYPE=WORK:;;${locationInfo?.value?.replace(/\n/g, ';') ?? locationInfo?.street ?? ''
+    };${locationInfo?.pincode ?? ''}`,
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp ?? ''}`,
     ...newSocials,
     'END:VCARD',
   ].join('\n');
 
-  const blob = new Blob([vcardData], { type: 'text/vcard' });
-  const url = URL.createObjectURL(blob);
+  // Create a data URI with the vCard data
+  const vcardDataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcardData);
 
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `${name}.vcf`;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
+  // Open the native contact app (works on iOS and Android)
+  window.location.href = vcardDataUri;
+}
 
-  // Release the object URL after the download has started
-  URL.revokeObjectURL(url);
+function createVCard(
+  websites,
+  name,
+  company,
+  designation,
+  email,
+  phoneNumber,
+  locationInfo,
+  socials,
+  whatsapp
+) {
+  openNativeContactApp(
+    websites,
+    name,
+    company,
+    designation,
+    email,
+    phoneNumber,
+    locationInfo,
+    socials,
+    whatsapp
+  );
 }
 
 const sendHiToWhatsApp = (whatsapp, btn) => {

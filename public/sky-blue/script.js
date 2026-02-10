@@ -1043,28 +1043,21 @@ function createVCard(
     `ORG:${company ?? ''}`,
     `TITLE:${designation ?? ''}`,
     `ADR;TYPE=WORK:;;${
-      locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
-    };${locationInfo.pincode ?? ''}`,
+      locationInfo?.value?.replace(/\n/g, ';') ?? locationInfo?.street ?? ''
+    };${locationInfo?.pincode ?? ''}`,
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp ?? ''}`,
     ...newSocials,
     'END:VCARD',
   ].join('\n');
 
-  const blob = new Blob([vcardData], { type: 'text/vcard' });
-  const url = URL.createObjectURL(blob);
+  // Create a data URI with the vCard data
+  const vcardDataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcardData);
 
-  const downloadLink = document.createElement('a');
-  downloadLink.href = url;
-  downloadLink.download = `${name}.vcf`;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-
-  // Release the object URL after the download has started
-  URL.revokeObjectURL(url);
+  // Open the native contact app (works on iOS and Android)
+  window.location.href = vcardDataUri;
 }
 
 function isPhoneNumber(value) {
