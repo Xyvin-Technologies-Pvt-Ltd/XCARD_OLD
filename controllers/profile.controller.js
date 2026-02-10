@@ -414,3 +414,72 @@ export const disableGames = async (req, res, next) => {
   }
 };
 
+
+/**
+ * @desc    Download vCard for profile
+ * @route   GET /profile/vcard/:id
+ * @access  Public
+ * @schema  Public
+ */
+export const downloadVCard = asyncHandler(async (req, res, next) => {
+  const profile = await Profile.findOne({ 'card.cardId': req?.params?.id });
+  
+  if (!profile) {
+    return next(new ErrorResponse('Profile not found', 404));
+  }
+
+  // Extract contact information
+  let email = null;
+  let phoneNumber = null;
+  let locationInfo = { street: '', pincode: '', value: '' };
+  let whatsapp = null;
+
+  if (profile.contact && profile.contact.contacts) {
+    profile.contact.contacts.forEach(contact => {
+      if (contact.type === 'email') email = contact.value;
+      else if (contact.type === 'phone') phoneNumber = contact.value;
+      else if (contact.type === 'location') {
+        locationInfo = {
+          street: contact.street || '',
+          pincode: contact.pincode || '',
+          value: contact.value || ''
+        };
+      }
+      else if (contact.type === 'wabusiness') whatsapp = contact.value;
+    });
+  }
+
+  // Build vCard data
+  const name = profile.profile?.name || 'Contact';
+  const name_split = name.split(' ');
+  const firstName = name_split[0];
+  const lastName = name_split.slice(1).join(' ');
+
+  const websites = profile.website?.websites || [];
+  const socials = profile.social?.socials || [];
+
+  const newWebsites = websites.map(website => `URL:${website.link}`);
+  const newSocials = socials.map(social => `URL:${social.value}`);
+
+  const vcardData = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `N:${lastName};${firstName};;`,
+    `FN:${name}`,
+    `EMAIL;TYPE=WORK:${email || ''}`,
+    `ORG:${profile.profile?.companyName || ''}`,
+    `TITLE:${profile.profile?.designation || ''}`,
+    `ADR;TYPE=WORK:;;${locationInfo.value.replace(/\n/g, ';') || locationInfo.street || ''};${locationInfo.pincode || ''}`,
+    `TEL;TYPE=CELL:${phoneNumber || ''}`,
+    `URL:${profile.profile?.profileLink || ''}`,
+    ...newWebsites,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp || ''}`,
+    ...newSocials,
+    'END:VCARD',
+  ].join('\r\n');
+
+  // Set headers to open in native contact app (not download)
+  res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
+  res.setHeader('Content-Disposition', `inline; filename="${name}.vcf"`);
+  res.send(vcardData);
+});

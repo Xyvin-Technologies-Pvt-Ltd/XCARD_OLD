@@ -1113,40 +1113,13 @@ function openNativeContactApp(
   socials,
   whatsapp
 ) {
-  const name_split = name.split(' ');
-  const firstName = name_split[0];
-  const lastName = name_split.slice(1).join(' ');
-
-  const newWebsites = Array.isArray(websites)
-    ? websites.map((website) => `URL:${website.link}`)
-    : [];
-
-  const newSocials = Array.isArray(socials)
-    ? socials?.map((social) => `URL:${social.value}`)
-    : [];
-
-  const vcardData = [
-    'BEGIN:VCARD',
-    'VERSION:3.0',
-    `N:${lastName};${firstName};;`,
-    `FN:${name ?? ''}`,
-    `EMAIL;TYPE=WORK:${email ?? ''}`,
-    `ORG:${company ?? ''}`,
-    `TITLE:${designation ?? ''}`,
-    `ADR;TYPE=WORK:;;${locationInfo?.value?.replace(/\n/g, ';') ?? locationInfo?.street ?? ''};${locationInfo?.pincode ?? ''}`,
-    `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
-    `URL:${window.location.href ?? ''}`,
-    ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp ?? ''}`,
-    ...newSocials,
-    'END:VCARD',
-  ].join('\n');
-
-  // Create a data URI with the vCard data
-  const vcardDataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcardData);
-
-  // Open the native contact app (works on iOS and Android)
-  window.location.href = vcardDataUri;
+  // Get the card ID from the current URL
+  const pathParts = window.location.pathname.split('/');
+  const cardId = pathParts[pathParts.length - 1];
+  
+  // Use server endpoint to download vCard
+  // This works better on iOS as it properly sets headers
+  window.location.href = `/profile/vcard/${cardId}`;
 }
 
 function createVCard(
