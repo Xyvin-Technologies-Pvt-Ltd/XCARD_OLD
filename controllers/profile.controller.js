@@ -479,7 +479,8 @@ export const downloadVCard = asyncHandler(async (req, res, next) => {
   ].join('\r\n');
 
   // Set headers to open in native contact app (not download)
-  res.setHeader('Content-Type', 'text/vcard; charset=utf-8');
-  res.setHeader('Content-Disposition', `inline; filename="${name}.vcf"`);
+  // Using text/x-vcard and inline disposition for better mobile support
+  res.setHeader('Content-Type', 'text/x-vcard; charset=utf-8');
+  res.setHeader('Content-Disposition', 'inline');
   res.send(vcardData);
 });
