@@ -166,61 +166,6 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-function openNativeContactApp(
-  websites,
-  name,
-  company,
-  designation,
-  email,
-  phoneNumber,
-  locationInfo,
-  socials,
-  whatsapp
-) {
-  // Build vCard data on client side for better mobile compatibility
-  const name_split = name ? name.split(' ') : ['', ''];
-  const firstName = name_split[0] || '';
-  const lastName = name_split.slice(1).join(' ') || '';
-  
-  const vcardData = [
-    'BEGIN:VCARD',
-    'VERSION:3.0',
-    `N:${lastName};${firstName};;`,
-    `FN:${name || ''}`,
-    `EMAIL;TYPE=WORK:${email || ''}`,
-    `ORG:${company || ''}`,
-    `TITLE:${designation || ''}`,
-    `TEL;TYPE=CELL:${phoneNumber || ''}`,
-    `TEL;TYPE=WORK,VOICE:${whatsapp || ''}`,
-    `ADR;TYPE=WORK:;;${locationInfo?.value || ''};;;`,
-  ];
-  
-  // Add websites
-  if (websites && websites.length > 0) {
-    websites.forEach(site => {
-      if (site.link) vcardData.push(`URL:${site.link}`);
-    });
-  }
-  
-  // Add social links
-  if (socials && socials.length > 0) {
-    socials.forEach(social => {
-      if (social.value) vcardData.push(`URL:${social.value}`);
-    });
-  }
-  
-  vcardData.push('END:VCARD');
-  
-  const vcard = vcardData.join('\r\n');
-  
-  // Create data URI
-  const dataUri = 'data:text/x-vcard;charset=utf-8,' + encodeURIComponent(vcard);
-  
-  // For mobile devices, this will open the contact app
-  // For desktop, it may download or open with default handler
-  window.location.href = dataUri;
-}
-
 function createVCard(
   websites,
   name,
@@ -232,17 +177,53 @@ function createVCard(
   socials,
   whatsapp
 ) {
-  openNativeContactApp(
-    websites,
-    name,
-    company,
-    designation,
-    email,
-    phoneNumber,
-    locationInfo,
-    socials,
-    whatsapp
-  );
+  const name_split = name.split(' ');
+  const firstName = name_split[0];
+  const lastName = name_split.slice(1).join(' ');
+
+  const newWebsites = Array.isArray(websites)
+    ? websites.map((website) => `URL:${website.link}`)
+    : [];
+
+  const newSocials = Array.isArray(socials)
+    ? socials?.map((social) => {
+        if (social.type != 'phone' && social.type != 'email') {
+          return `URL:${social.value}`;
+        }
+      })
+    : [];
+
+  const vcardData = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `N:${lastName};${firstName};;`,
+    `FN:${name ?? ''}`,
+    `EMAIL;TYPE=WORK:${email ?? ''}`,
+    `ORG:${company ?? ''}`,
+    `TITLE:${designation ?? ''}`,
+    `ADR;TYPE=WORK:;;${
+      locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
+    };${locationInfo.pincode ?? ''}`,
+    `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
+    `URL:${window.location.href ?? ''}`,
+    ...newWebsites,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    ...newSocials,
+    'END:VCARD',
+  ].join('\n');
+
+  const blob = new Blob([vcardData], { type: 'text/vcard' });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = `${name}.vcf`;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+
+  // Release the object URL after the download has started
+  URL.revokeObjectURL(url);
 }
 
 const sendHiToWhatsApp = (whatsapp, btn) => {

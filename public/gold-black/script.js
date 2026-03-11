@@ -131,7 +131,7 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-function openNativeContactApp(
+function createVCard(
   websites,
   name,
   company,
@@ -142,48 +142,49 @@ function openNativeContactApp(
   socials,
   whatsapp
 ) {
-  // Build vCard data on client side for better mobile compatibility
-  const name_split = name ? name.split(' ') : ['', ''];
-  const firstName = name_split[0] || '';
-  const lastName = name_split.slice(1).join(' ') || '';
-  
+  const name_split = name.split(' ');
+  const firstName = name_split[0];
+  const lastName = name_split.slice(1).join(' ');
+
+  const newWebsites = Array.isArray(websites)
+    ? websites.map((website) => `URL:${website.link}`)
+    : [];
+
+  const newSocials = Array.isArray(socials)
+    ? socials?.map((social) => `URL:${social.value}`)
+    : [];
+
   const vcardData = [
     'BEGIN:VCARD',
     'VERSION:3.0',
     `N:${lastName};${firstName};;`,
-    `FN:${name || ''}`,
-    `EMAIL;TYPE=WORK:${email || ''}`,
-    `ORG:${company || ''}`,
-    `TITLE:${designation || ''}`,
-    `TEL;TYPE=CELL:${phoneNumber || ''}`,
-    `TEL;TYPE=WORK,VOICE:${whatsapp || ''}`,
-    `ADR;TYPE=WORK:;;${locationInfo?.value || ''};;;`,
-  ];
-  
-  // Add websites
-  if (websites && websites.length > 0) {
-    websites.forEach(site => {
-      if (site.link) vcardData.push(`URL:${site.link}`);
-    });
-  }
-  
-  // Add social links
-  if (socials && socials.length > 0) {
-    socials.forEach(social => {
-      if (social.value) vcardData.push(`URL:${social.value}`);
-    });
-  }
-  
-  vcardData.push('END:VCARD');
-  
-  const vcard = vcardData.join('\r\n');
-  
-  // Create data URI
-  const dataUri = 'data:text/x-vcard;charset=utf-8,' + encodeURIComponent(vcard);
-  
-  // For mobile devices, this will open the contact app
-  // For desktop, it may download or open with default handler
-  window.location.href = dataUri;
+    `FN:${name ?? ''}`,
+    `EMAIL;TYPE=WORK:${email ?? ''}`,
+    `ORG:${company ?? ''}`,
+    `TITLE:${designation ?? ''}`,
+    `ADR;TYPE=WORK:;;${
+      locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
+    };${locationInfo.pincode ?? ''}`,
+    `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
+    `URL:${window.location.href ?? ''}`,
+    ...newWebsites,
+    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    ...newSocials,
+    'END:VCARD',
+  ].join('\n');
+
+  const blob = new Blob([vcardData], { type: 'text/vcard' });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = `${name}.vcf`;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+
+  // Release the object URL after the download has started
+  URL.revokeObjectURL(url);
 }
 
 const sendHiToWhatsApp = (whatsapp, btn) => {
@@ -309,8 +310,9 @@ function generateContactMeLabel(status) {
     return '';
   }
   return `
-          <h4 id="contact_me_label" class="gradient_text sub_heading">${data.contact.label ?? `Contact me`
-    }</h4>
+          <h4 id="contact_me_label" class="gradient_text sub_heading">${
+            data.contact.label ?? `Contact me`
+          }</h4>
       `;
 }
 
@@ -326,8 +328,8 @@ function generateLongContactCard(label, type, link, value) {
         <div class="contact_long_card">
             <a class="contact_link" href="${link}">
                 <img src="/profile/public/gold-black/assets/icons/${contactCardImg(
-    type
-  )}" alt="">
+                  type
+                )}" alt="">
                 <div class="contact_info">
                     <h5 class="fw_500 f_12">${displayLabel}</h5>
                     <p class="gradient_text f_14 fw_600">${value}</p>
@@ -345,7 +347,7 @@ function buildSocialDisplayLabel(social) {
   return social.label && social.label.trim() !== '' ? social.label : social.type;
 }
 
-function buildIconTitleAttr(social) {
+function buildIconTitleAttr(social){
   return social.type === 'google' ? ' title="Google Review" aria-label="Google Review"' : '';
 }
 
@@ -377,10 +379,12 @@ function generateProductCard(
             <div class="product_details">
                 <div class="product_name">${productName}</div>
                 <div class="product_price">
-                    <p class="fake_price">${fakePrice === null ? '' : `${fakePrice}`
-    }</p>
-                    <p class="orginal_price gradient_text">${originalPrice === null ? '' : `${originalPrice}`
-    }</p>
+                    <p class="fake_price">${
+                      fakePrice === null ? '' : `${fakePrice}`
+                    }</p>
+                    <p class="orginal_price gradient_text">${
+                      originalPrice === null ? '' : `${originalPrice}`
+                    }</p>
                 </div>
             </div>
         </div>
@@ -400,9 +404,9 @@ function generateServiceCard(serviceName, serviceDescription, imageUrl, link) {
     service_no_img
   )}','${link}')" class="service_card">
             <img class="service_img" src="${handleImage(
-    imageUrl,
-    service_no_img
-  )}" alt="${serviceName}">
+              imageUrl,
+              service_no_img
+            )}" alt="${serviceName}">
             <div class="service_details">
                 <h5 class="service_name">${serviceName}</h5>
                 <p class="service_para">${service_desc}</p>
@@ -420,9 +424,9 @@ function generateAwardCard(awardTitle, organizationName, imageUrl) {
     award_no_img
   )}')" class="award_card">
             <img class="award_img" src="${handleImage(
-    imageUrl,
-    award_no_img
-  )}" alt="product">
+              imageUrl,
+              award_no_img
+            )}" alt="product">
             <div class="product_details">
                 <h5 class="fw_600 f_16 gradient_text">${awardTitle}</h5>
                 <p class="fw_400 f_16">${organizationName}</p>
@@ -451,10 +455,11 @@ function generateDocumentCard(doc) {
                 <img src="/profile/public/gold-black/assets/icons/global.svg" alt="file">
                 <p style="word-break: break-all;">${documentName}</p>
             </div>
-            <button class="btn" onclick="${isViewableData
-      ? `viewDocument('${data.public}')`
-      : `downloadDocument('${data.public}', '${data.fileName}', '${data.mimeType}')`
-    }">
+            <button class="btn" onclick="${
+              isViewableData
+                ? `viewDocument('${data.public}')`
+                : `downloadDocument('${data.public}', '${data.fileName}', '${data.mimeType}')`
+            }">
                 <img src="/profile/public/gold-black/assets/icons/${icon}" alt="download">
             </button>
         </div>
@@ -467,9 +472,9 @@ function generateCertificateCard(certificateTitle, organizationName, imageUrl) {
   return `
         <div class="certificate_card">
             <img src="${handleImage(
-    imageUrl,
-    certificate_no_img
-  )}" alt="certificate">
+              imageUrl,
+              certificate_no_img
+            )}" alt="certificate">
             <h5 class="gradient_text fw_600 f_16">${certificateTitle}</h5>
             <p class="fw_400 f_16">${organizationName}</p>
         </div>
@@ -539,7 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // enquery form
   const enquiry_btn = document.getElementById('enquiry_btn');
-
+  
   // contact
   const save_contact = document.getElementById('save_contact');
   const lets_chat_btn = document.getElementById('chatButton');
@@ -552,7 +557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if profile has the specific group ID and hide enquiry section
   if (data && data.group) {
     console.log('Profile Group ID:', data.group);
-
+    
     if (data.group === '689c7532d75d59a0d06966e3') {
       const enquirySection = document.querySelector('.enquiry_section');
       if (enquirySection) {
@@ -840,7 +845,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   save_contact.addEventListener('click', () => {
-    openNativeContactApp(
+    createVCard(
       websites,
       name,
       company,
