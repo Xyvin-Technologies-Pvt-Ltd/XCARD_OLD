@@ -304,10 +304,18 @@ header{
 }
 .contact_cards {
   margin-top: 24px;
+  width: 100%;
+  max-width: clamp(280px, 92vw, 520px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(6px, 1.5vw, 12px);
+  padding-right: clamp(6px, 1.5vw, 12px);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  place-items: center;
-  gap: 20px;
+  /* Always keep 4 icons per row with responsive spacing */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: clamp(12px, 3vw, 20px);
 }
 .contact_card_container {
   display: flex;
@@ -337,8 +345,10 @@ header{
   color: #8a7c72;
   text-align: center;
   margin: 0;
-  max-width: 60px;
-  word-wrap: break-word;
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.2;
 }
 
@@ -1033,7 +1043,7 @@ footer {
 
 @media(max-width:375px){
   .contact_cards{
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   
   .user_name {
