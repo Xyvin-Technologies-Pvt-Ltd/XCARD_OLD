@@ -25,6 +25,7 @@ const ProfileSchema = new mongoose.Schema(
           'white&black',
           'violet&green',
           'orange&black',
+          'offwhite&orange',
           'aero&black',
           'white&blue',
           'blue&black',

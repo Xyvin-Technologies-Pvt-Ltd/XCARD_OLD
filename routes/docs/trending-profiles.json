@@ -70,7 +70,7 @@
             "name": "theme",
             "schema": {
               "type": "string",
-              "enum": ["gold&black", "white&black", "violet&green", "orange&black", "aero&black", "white&blue", "blue&black", "restaturants"]
+              "enum": ["gold&black", "white&black", "violet&green", "orange&black", "offwhite&orange", "aero&black", "white&blue", "blue&black", "restaturants"]
             },
             "description": "Filter by card theme"
           },

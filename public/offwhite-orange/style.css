@@ -7,18 +7,21 @@
 }
 
 :root {
-  --bg-dark: #000000;
-  --bg-medium: #181818;
-  --bg-light: #272727;
+  --bg-dark: #f6f2ea; /* page background (offwhite) */
+  --bg-medium: #ffffff; /* elevated surface */
+  --bg-light: #ffffff; /* cards/inputs */
 
   --primary-light: #f68c1f;
   --primary-dark: #c36300;
 
-  --text-clr: #ffffff;
+  --text-clr: #111827;
+  --text-muted: #6b7280;
+  --border-clr: rgba(17, 24, 39, 0.12);
 
   --font-outfit: "Outfit", Arial, sans-serif;
-  --scorollBorder: #ffffff;
-  --scrollIcon: #333;
+  --scorollBorder: rgba(17, 24, 39, 0.25); /* legacy typo (kept) */
+  --scrollBorder: rgba(17, 24, 39, 0.25);
+  --scrollIcon: #111827;
   --scrollBg: linear-gradient(138.61deg,
       #ffffff -7.97%,
       rgba(255, 255, 255, 0) 122.9%);
@@ -150,12 +153,13 @@ ul {
 .btn-primary {
   background-image: linear-gradient(var(--primary-light), var(--primary-dark));
   backdrop-filter: blur(27px);
-  color: var(--text-clr);
+  color: #ffffff;
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.31);
-  backdrop-filter: blur(27px);
+  background-color: rgba(17, 24, 39, 0.06);
+  border: 1px solid var(--border-clr);
+  color: var(--text-clr);
 }
 
 /* Socials Section */
@@ -258,7 +262,7 @@ ul {
   border: 1px solid rgba(0, 0, 0, 0.2);
   background: var(--bg-light);
   padding-left: 21px;
-  color: white;
+  color: var(--text-clr);
 }
 
 .iti--separate-dial-code:focus {
@@ -266,7 +270,7 @@ ul {
 }
 
 .iti--separate-dial-code::placeholder {
-  color: white;
+  color: var(--text-muted);
 }
 
 .iti--allow-dropdown {
@@ -276,7 +280,7 @@ ul {
   border: 1px solid rgba(0, 0, 0, 0.2);
   background: var(--bg-light);
   padding-left: 21px;
-  color: white;
+  color: var(--text-clr);
 }
 
 .iti--allow-dropdown:focus {
@@ -287,7 +291,7 @@ ul {
   width: 80%;
   height: 50vh;
   background-color: var(--bg-light);
-  color: whites;
+  color: var(--text-clr);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
   bottom: 2rem;
@@ -628,7 +632,7 @@ ul {
 }
 
 .award-card p {
-  color: #a5a5a5;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 400;
 }
@@ -650,7 +654,7 @@ ul {
 #upi .copy {
   background-color: transparent;
   border: none;
-  color: white;
+  color: var(--text-clr);
 }
 
 /* Certificates Section */
@@ -814,7 +818,7 @@ ul {
 }
 
 .modal-content {
-  background-color: #272727;
+  background-color: var(--bg-medium);
   position: relative;
   height: auto;
   width: 100%;
@@ -841,7 +845,7 @@ ul {
 }
 
 .modal-content>.description {
-  color: #a5a5a5;
+  color: var(--text-muted);
   font-size: 1rem;
   font-weight: 400;
 }
@@ -943,16 +947,17 @@ footer {
   width: 100%;
   height: 50px;
   padding: 0 3%;
-  background: #333;
+  background: var(--bg-medium);
+  border-top: 1px solid var(--border-clr);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .footer_text {
-  color: #878787;
+  color: var(--text-muted);
 }
 
 .footer_company_text {
-  color: #FFF;
+  color: var(--text-clr);
 }

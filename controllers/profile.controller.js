@@ -121,6 +121,8 @@ export const viewProfile = asyncHandler(async (req, res, next) => {
     res.render('white-black', { data: profile });
   } else if (profileTheme == 'orange&black') {
     res.render('orange-black', { data: profile });
+  } else if (profileTheme == 'offwhite&orange') {
+    res.render('offwhite-orange', { data: profile });
   } else if (profileTheme == 'white&blue') {
     res.render('white-blue', { data: profile });
   } else if (profileTheme == 'blue&black') {

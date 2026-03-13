@@ -1,6 +1,12 @@
 const viewable = ['png', 'jpg', 'jpeg', 'gif', 'mov', 'svg', 'ico', 'webp'];
 const data = JSON.parse(document.currentScript.getAttribute('data'));
 
+const THEME_PUBLIC_ROOT = new URL(
+  document.currentScript.src,
+  window.location.origin
+).pathname.replace(/\/script\.js$/, '');
+const THEME_ASSET_ROOT = `${THEME_PUBLIC_ROOT}/assets/orange-dark`;
+
 const profile = data.profile;
 const contacts =
   data.contact && data.contact.status && data.contact.contacts?.length > 0
@@ -146,7 +152,7 @@ function generateProfile() {
   <img src="${
     profile.profileBanner?.public
       ? profile.profileBanner?.public
-      : '/profile/public/orange-black/assets/orange-dark/card-bg.png'
+      : `${THEME_ASSET_ROOT}/card-bg.png`
   }" alt="card-bg" />
   <div class="info">
     <img
@@ -154,7 +160,7 @@ function generateProfile() {
       src="${
         profile.profilePicture?.public
           ? profile.profilePicture?.public
-          : '/profile/public/orange-black/assets/orange-dark/no_image.png'
+          : `${THEME_ASSET_ROOT}/no_image.png`
       }"
       alt="profile-pic"
     />
@@ -168,7 +174,7 @@ function generateProfile() {
     <button class="btn btn-primary" id="save_contact_btn" target="_blank" href="${
       profile.profileLink ?? '#'
     }">
-     <img src="/profile/public/orange-black/assets/orange-dark/icons/add-contact.svg" alt="add-contact">
+     <img src="${THEME_ASSET_ROOT}/icons/add-contact.svg" alt="add-contact">
       <span>Save Contact</span>
     </button>
   </div>
@@ -237,7 +243,7 @@ function generateWebsites() {
         <a class="website-card" target="_blank"  rel="noreferrer" href="${ensureHttps(
           website.link
         )}">
-          <img src="/profile/public/orange-black/assets/orange-dark/icons/global.svg" alt="website" />
+          <img src="${THEME_ASSET_ROOT}/icons/global.svg" alt="website" />
           <span class="text">${website.name}</span>
         </a>
       </li>
@@ -265,15 +271,15 @@ function generateAwards() {
   awards.forEach((award) => {
     if (award.label) {
       const card = document.createElement('li');
-      card.classList.add('award-card');
-      card.innerHTML = `
-        <img src="${
-          award.image?.public ??
-          '/profile/public/orange-black/assets/orange-dark/no_image.png'
-        }" alt="award" />
-        <h3>${award.label}</h3>
-        ${award.value && '<p>' + shorten(award.value) + '</p>'}
-      `;
+       card.classList.add('award-card');
+       card.innerHTML = `
+         <img src="${
+           award.image?.public ??
+           `${THEME_ASSET_ROOT}/no_image.png`
+         }" alt="award" />
+         <h3>${award.label}</h3>
+         ${award.value && '<p>' + shorten(award.value) + '</p>'}
+       `;
       ul.appendChild(card);
       card.addEventListener('click', () =>
         openModal('award', {
@@ -303,15 +309,15 @@ function generateServices() {
       content += `
       <div class="service-card">
         <button>
-          <img src="${
-            service.image?.public
-              ? service.image.public
-              : '/profile/public/orange-black/assets/orange-dark/no_image.png'
-          }" alt="service" />
-          <h3>${service.label}</h3>
-          <p>${shorten(service.description ?? '')}</p>
-        </button>
-      </div>
+           <img src="${
+             service.image?.public
+               ? service.image.public
+               : `${THEME_ASSET_ROOT}/no_image.png`
+           }" alt="service" />
+           <h3>${service.label}</h3>
+           <p>${shorten(service.description ?? '')}</p>
+         </button>
+       </div>
       `;
     }
   });
@@ -351,15 +357,15 @@ function generateProducts() {
       content += `
       <div class="service-card">
         <button>
-          <img src="${
-            product.image?.public
-              ? product.image.public
-              : '/profile/public/orange-black/assets/orange-dark/no_image.png'
-          }" alt="" />
-          <h3>${product.name}</h3>
-          <p>${shorten(product.description ?? '')}</p>
-        </button>
-      </div>
+           <img src="${
+             product.image?.public
+               ? product.image.public
+               : `${THEME_ASSET_ROOT}/no_image.png`
+           }" alt="" />
+           <h3>${product.name}</h3>
+           <p>${shorten(product.description ?? '')}</p>
+         </button>
+       </div>
       `;
     }
   });
@@ -461,10 +467,10 @@ function generateCatalogues() {
       li.innerHTML += `
     <div class="website-card">
       <div class="content">
-        <img src="/profile/public/orange-black/assets/orange-dark/icons/pdf.svg" alt="" />
+        <img src="${THEME_ASSET_ROOT}/icons/pdf.svg" alt="" />
         <span class="text" style="word-break: break-all;">${label}</span>
       </div>
-      <button class="action"><img src="/profile/public/orange-black/assets/orange-dark/icons/${icon}" alt="${icon}" /></button>
+      <button class="action"><img src="${THEME_ASSET_ROOT}/icons/${icon}" alt="${icon}" /></button>
     </div>
     `;
       ul.appendChild(li);
@@ -495,11 +501,11 @@ function generateUpis() {
     li.innerHTML += `
       <div class="website-card">
       <div class="content">
-        <img src="/profile/public/orange-black/assets/orange-dark/icons/upi.png" alt="upi" />
+        <img src="${THEME_ASSET_ROOT}/icons/upi.png" alt="upi" />
         <span class="text">${upi.id}</span>
       </div>
       <button class="action">
-        <img src="/profile/public/orange-black/assets/orange-dark/icons/copy.svg" alt="copy" />
+        <img src="${THEME_ASSET_ROOT}/icons/copy.svg" alt="copy" />
       </button>
     </div>
     `;
@@ -565,7 +571,7 @@ function generateSocials() {
     smallDiv.innerHTML += `
     <div class="card">
           <a target="_blank" href="tel:${phone.value}">
-            <img src="/profile/public/orange-black/assets/orange-dark/socials/phone.svg" alt="phone" />
+            <img src="${THEME_ASSET_ROOT}/socials/phone.svg" alt="phone" />
           </a>
       </div>
     `;
@@ -575,7 +581,7 @@ function generateSocials() {
     smallDiv.innerHTML += `
     <div class="card">
           <a target="_blank" href="mailto:${email.value}">
-            <img src="/profile/public/orange-black/assets/orange-dark/socials/mail.svg" alt="email" />
+            <img src="${THEME_ASSET_ROOT}/socials/mail.svg" alt="email" />
           </a>
       </div>
     `;
@@ -585,7 +591,7 @@ function generateSocials() {
     largeDiv.innerHTML += `
       <a target="_blank" href="https://wa.me/${wabusiness.value}?text=Hi" id="say-hello-btn" class="btn btn-secondary whatsapp-btn">
       <img
-        src="/profile/public/orange-black/assets/orange-dark/icons/whatsapp-org.svg"
+        src="${THEME_ASSET_ROOT}/icons/whatsapp-org.svg"
         alt="whatsapp"
       />
       <span>Let's Chat!</span>
@@ -595,7 +601,7 @@ function generateSocials() {
     smallDiv.innerHTML += `
     <div class="card">
       <a target="_blank" href="https://wa.me/${wabusiness.value}">
-        <img src="/profile/public/orange-black/assets/orange-dark/socials/wp_b.svg" alt="wabusiness" />
+        <img src="${THEME_ASSET_ROOT}/socials/wp_b.svg" alt="wabusiness" />
       </a>
     </div>`;
   }
@@ -609,7 +615,7 @@ function generateSocials() {
         location.pincode ??
         'https://www.google.com/maps?q=' + query.replace(/\s+/g, '+')
       }">
-        <img src="/profile/public/orange-black/assets/orange-dark/socials/location.svg" alt="location" />
+        <img src="${THEME_ASSET_ROOT}/socials/location.svg" alt="location" />
       </a>
     </div>`;
   }
@@ -618,7 +624,7 @@ function generateSocials() {
     smallDiv.innerHTML += `
     <div class="card">
         <a target="_blank" href="https://wa.me/${whatsapp.value}">
-          <img src="/profile/public/orange-black/assets/orange-dark/socials/whatsapp.svg" alt="whatsapp" />
+          <img src="${THEME_ASSET_ROOT}/socials/whatsapp.svg" alt="whatsapp" />
         </a>
     </div>
   `;
@@ -667,9 +673,9 @@ function getSocialIconPath(type){
   const file = contactCardImg(type);
   // Use icons folder for app badges for better consistency
   if (type === 'appstore' || type === 'googleplay') {
-    return `/profile/public/orange-black/assets/orange-dark/icons/${file}`;
+    return `${THEME_ASSET_ROOT}/icons/${file}`;
   }
-  return `/profile/public/orange-black/assets/orange-dark/socials/${file}`;
+  return `${THEME_ASSET_ROOT}/socials/${file}`;
 }
 
 function getSocialIconHTML(type){
@@ -733,7 +739,7 @@ function generateCertificates() {
               <img
                 src="${
                   cert.image?.public ??
-                  '/profile/public/orange-black/assets/orange-dark/no_image.png'
+                  `${THEME_ASSET_ROOT}/no_image.png`
                 }"
                 alt="certificate"
               />
@@ -825,7 +831,7 @@ function generateEnquiry() {
 
       const btn = e.target.querySelector('button');
 
-      btn.innerHTML = `<img src="/profile/public/orange-black/assets/orange-dark/icons/loader.svg" class="loading" style="width:1.25rem;height:1.25rem" />`;
+      btn.innerHTML = `<img src="${THEME_ASSET_ROOT}/icons/loader.svg" class="loading" style="width:1.25rem;height:1.25rem" />`;
       btn.disabled = true;
       const info = document.querySelector('.form-info');
       const p = info.querySelector('#form-info');
@@ -874,9 +880,9 @@ function closeModal() {
 function openModal(type, data) {
   const parent = document.querySelector('.modal');
   const modal = document.querySelector('.modal > .modal-content');
-  let content = `<button class="close-button"><img src="/profile/public/orange-black/assets/orange-dark/icons/close.svg" alt="close"></button>
+  let content = `<button class="close-button"><img src="${THEME_ASSET_ROOT}/icons/close.svg" alt="close"></button>
   <img class="w-full" src="${
-    data.image ?? '/profile/public/orange-black/assets/orange-dark/no_image.png'
+    data.image ?? `${THEME_ASSET_ROOT}/no_image.png`
   }" alt="image"> <h2>${data.heading}</h2>
   <p class="description">${data.desc ?? ''}</p>`;
 
@@ -1008,9 +1014,9 @@ function setContent() {
 
 function handleImage(imageUrl) {
   if (imageUrl === null) {
-    imageUrl = '/profile/public/orange-black/assets/images/no_image.png';
+    imageUrl = `${THEME_ASSET_ROOT}/no_image.png`;
   } else if (imageUrl.public === null || imageUrl.public === '') {
-    imageUrl = '/profile/public/orange-black/assets/images/no_image.png';
+    imageUrl = `${THEME_ASSET_ROOT}/no_image.png`;
   } else {
     imageUrl = imageUrl.public;
   }
@@ -1045,7 +1051,7 @@ function copyToClipboard(text, li) {
         setTimeout(() => {
           if (img) {
             img.src =
-              '/profile/public/orange-black/assets/orange-dark/icons/tick.svg';
+              `${THEME_ASSET_ROOT}/icons/tick.svg`;
           }
         }, 500);
 
@@ -1053,7 +1059,7 @@ function copyToClipboard(text, li) {
         setTimeout(() => {
           if (img) {
             img.src =
-              '/profile/public/orange-black/assets/orange-dark/icons/copy.svg';
+              `${THEME_ASSET_ROOT}/icons/copy.svg`;
           }
         }, 2500);
       })

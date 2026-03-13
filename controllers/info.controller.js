@@ -274,7 +274,7 @@ export const getTrendingProfiles = asyncHandler(async (req, res, next) => {
         companyName: "Filter by exact company name", 
         designation: "Filter by designation (partial match)",
         exactDesignation: "Filter by exact designation (exact match only)",
-        theme: "Filter by card theme (gold&black, white&black, violet&green, orange&black, aero&black, white&blue, blue&black, restaturants)",
+        theme: "Filter by card theme (gold&black, white&black, violet&green, orange&black, offwhite&orange, aero&black, white&blue, blue&black, restaturants)",
         minVisits: "Minimum visit count",
         maxVisits: "Maximum visit count",
         visible: "Filter by visibility status (true/false)",
