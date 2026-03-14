@@ -212,23 +212,48 @@ function createVCard(
     snapchat: 'Snapchat',
   };
 
+  const extraTels = [];
+  const extraEmails = [];
+
   const newSocials = Array.isArray(socials)
     ? socials
         .filter((social) => social && social.value)
-        .map((social) => {
+        .flatMap((social) => {
           const typeKey = String(social.type ?? '').toLowerCase();
+
+          // Phone numbers → proper TEL field
+          if (typeKey === 'phone') {
+            const raw = social.value.replace(/^tel:/, '');
+            if (raw !== phoneNumber) extraTels.push(raw);
+            return [];
+          }
+
+          // Emails → proper EMAIL field
+          if (typeKey === 'email') {
+            const raw = social.value.replace(/^mailto:/, '');
+            if (raw !== email) extraEmails.push(raw);
+            return [];
+          }
+
+          // Location → skip, already in ADR field
+          if (typeKey === 'location') return [];
+
           const profileLabel = socialProfileTypeMap[typeKey];
           const idx = itemIndex++;
           if (profileLabel) {
             return [
-              `item${idx}.URL:${social.value}`,
-              `item${idx}.X-ABLabel:${profileLabel}`,
-            ].join('\n');
+              [
+                `item${idx}.URL:${social.value}`,
+                `item${idx}.X-ABLabel:${profileLabel}`,
+              ].join('\n'),
+            ];
           }
           return [
-            `item${idx}.URL:${social.value}`,
-            `item${idx}.X-ABLabel:Website`,
-          ].join('\n');
+            [
+              `item${idx}.URL:${social.value}`,
+              `item${idx}.X-ABLabel:Website`,
+            ].join('\n'),
+          ];
         })
     : [];
 
@@ -244,6 +269,8 @@ function createVCard(
       locationInfo.value.replace(/\n/g, ';') ?? locationInfo.street ?? ''
     };${locationInfo.pincode ?? ''}`,
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
+    ...extraTels.map((t) => `TEL;TYPE=CELL:${t}`),
+    ...extraEmails.map((e) => `EMAIL;TYPE=WORK:${e}`),
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
     ...(whatsapp
