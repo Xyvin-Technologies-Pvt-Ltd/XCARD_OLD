@@ -134,6 +134,7 @@ const contactCardImg = (type) => {
     case 'google':
       return 'google.svg';
     case 'facebook':
+    case 'fb':
       return 'fb.svg';
     case 'phone':
       return 'call.svg';
@@ -142,8 +143,6 @@ const contactCardImg = (type) => {
     case 'whatsapp':
       return 'whatsapp.svg';
     case 'email':
-      return 'email.svg';
-    case 'gmail':
       return 'email.svg';
     case 'gmail':
       return 'email.svg';
@@ -185,12 +184,37 @@ function createVCard(
     ? websites.map((website) => `URL:${website.link}`)
     : [];
 
+  const socialProfileTypeMap = {
+    facebook: 'facebook',
+    fb: 'facebook',
+    twitter: 'twitter',
+    x: 'twitter',
+    instagram: 'instagram',
+    linkedin: 'linkedin',
+    youtube: 'youtube',
+    google: 'google',
+    spotify: 'spotify',
+    medium: 'medium',
+    behance: 'behance',
+    github: 'github',
+    dribble: 'dribbble',
+    whatsapp: 'whatsapp',
+    wabusiness: 'whatsapp',
+    tiktok: 'tiktok',
+    snapchat: 'snapchat',
+  };
+
   const newSocials = Array.isArray(socials)
-    ? socials?.map((social) => {
-        if (social.type != 'phone' && social.type != 'email') {
+    ? socials
+        .filter((social) => social && social.value)
+        .map((social) => {
+          const typeKey = String(social.type ?? '').toLowerCase();
+          const profileType = socialProfileTypeMap[typeKey];
+          if (profileType) {
+            return `X-SOCIALPROFILE;TYPE=${profileType}:${social.value}`;
+          }
           return `URL:${social.value}`;
-        }
-      })
+        })
     : [];
 
   const vcardData = [
@@ -207,7 +231,7 @@ function createVCard(
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`,
+    ...(whatsapp ? [`X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`] : []),
     ...newSocials,
     'END:VCARD',
   ].join('\n');

@@ -461,7 +461,37 @@ export const downloadVCard = asyncHandler(async (req, res, next) => {
   const socials = profile.social?.socials || [];
 
   const newWebsites = websites.map(website => `URL:${website.link}`);
-  const newSocials = socials.map(social => `URL:${social.value}`);
+
+  const socialProfileTypeMap = {
+    facebook: 'facebook',
+    fb: 'facebook',
+    twitter: 'twitter',
+    x: 'twitter',
+    instagram: 'instagram',
+    linkedin: 'linkedin',
+    youtube: 'youtube',
+    google: 'google',
+    spotify: 'spotify',
+    medium: 'medium',
+    behance: 'behance',
+    github: 'github',
+    dribble: 'dribbble',
+    whatsapp: 'whatsapp',
+    wabusiness: 'whatsapp',
+    tiktok: 'tiktok',
+    snapchat: 'snapchat',
+  };
+
+  const newSocials = socials
+    .filter(social => social && social.value)
+    .map(social => {
+      const typeKey = String(social.type || '').toLowerCase();
+      const profileType = socialProfileTypeMap[typeKey];
+      if (profileType) {
+        return `X-SOCIALPROFILE;TYPE=${profileType}:${social.value}`;
+      }
+      return `URL:${social.value}`;
+    });
 
   const vcardData = [
     'BEGIN:VCARD',
@@ -475,7 +505,7 @@ export const downloadVCard = asyncHandler(async (req, res, next) => {
     `TEL;TYPE=CELL:${phoneNumber || ''}`,
     `URL:${profile.profile?.profileLink || ''}`,
     ...newWebsites,
-    `X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp || ''}`,
+    ...(whatsapp ? [`X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`] : []),
     ...newSocials,
     'END:VCARD',
   ].join('\r\n');
