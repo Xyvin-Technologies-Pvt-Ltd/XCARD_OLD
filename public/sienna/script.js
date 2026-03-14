@@ -180,28 +180,36 @@ function createVCard(
   const firstName = name_split[0];
   const lastName = name_split.slice(1).join(' ');
 
+  let itemIndex = 1;
+
   const newWebsites = Array.isArray(websites)
-    ? websites.map((website) => `URL:${website.link}`)
+    ? websites.map((website) => {
+        const idx = itemIndex++;
+        return [
+          `item${idx}.URL:${website.link}`,
+          `item${idx}.X-ABLabel:Website`,
+        ].join('\n');
+      })
     : [];
 
   const socialProfileTypeMap = {
-    facebook: 'facebook',
-    fb: 'facebook',
-    twitter: 'twitter',
-    x: 'twitter',
-    instagram: 'instagram',
-    linkedin: 'linkedin',
-    youtube: 'youtube',
-    google: 'google',
-    spotify: 'spotify',
-    medium: 'medium',
-    behance: 'behance',
-    github: 'github',
-    dribble: 'dribbble',
-    whatsapp: 'whatsapp',
-    wabusiness: 'whatsapp',
-    tiktok: 'tiktok',
-    snapchat: 'snapchat',
+    facebook: 'Facebook',
+    fb: 'Facebook',
+    twitter: 'Twitter',
+    x: 'Twitter',
+    instagram: 'Instagram',
+    linkedin: 'LinkedIn',
+    youtube: 'YouTube',
+    google: 'Google',
+    spotify: 'Spotify',
+    medium: 'Medium',
+    behance: 'Behance',
+    github: 'GitHub',
+    dribble: 'Dribbble',
+    whatsapp: 'WhatsApp',
+    wabusiness: 'WhatsApp',
+    tiktok: 'TikTok',
+    snapchat: 'Snapchat',
   };
 
   const newSocials = Array.isArray(socials)
@@ -209,11 +217,18 @@ function createVCard(
         .filter((social) => social && social.value)
         .map((social) => {
           const typeKey = String(social.type ?? '').toLowerCase();
-          const profileType = socialProfileTypeMap[typeKey];
-          if (profileType) {
-            return `X-SOCIALPROFILE;TYPE=${profileType}:${social.value}`;
+          const profileLabel = socialProfileTypeMap[typeKey];
+          const idx = itemIndex++;
+          if (profileLabel) {
+            return [
+              `item${idx}.URL:${social.value}`,
+              `item${idx}.X-ABLabel:${profileLabel}`,
+            ].join('\n');
           }
-          return `URL:${social.value}`;
+          return [
+            `item${idx}.URL:${social.value}`,
+            `item${idx}.X-ABLabel:Website`,
+          ].join('\n');
         })
     : [];
 
@@ -231,7 +246,15 @@ function createVCard(
     `TEL;TYPE=CELL:${phoneNumber ?? ''}`,
     `URL:${window.location.href ?? ''}`,
     ...newWebsites,
-    ...(whatsapp ? [`X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`] : []),
+    ...(whatsapp
+      ? (() => {
+          const idx = itemIndex++;
+          return [
+            `item${idx}.URL:${whatsapp}`,
+            `item${idx}.X-ABLabel:WhatsApp`,
+          ];
+        })()
+      : []),
     ...newSocials,
     'END:VCARD',
   ].join('\n');
