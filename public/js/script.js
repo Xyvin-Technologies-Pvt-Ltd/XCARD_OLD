@@ -231,7 +231,7 @@ const createVcard = () => {
 
 const saveContactBtn = document.getElementById('save-contact');
 saveContactBtn.addEventListener('click', () => {
-  createVcard();
+  window.location.href = '/profile/vcard/' + data.card.cardId;
 });
 
 const nameElement = document.getElementById('name');

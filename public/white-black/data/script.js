@@ -550,7 +550,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     save_contact.addEventListener("click", () => {
-        createVCard(websites, name, company, designation, email, phoneNumber, locationInfo, socials, whatsapp)
+        window.location.href = '/profile/vcard/' + data.card.cardId;
     })
 
     send_hi_btn.addEventListener("click", () => {

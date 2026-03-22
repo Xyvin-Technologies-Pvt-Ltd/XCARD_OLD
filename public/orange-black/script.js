@@ -201,19 +201,9 @@ function generateProfile() {
     document.getElementById('save_contact_btn').style.display = 'none';
   }
 
-  button.addEventListener('click', () =>
-    createVCard(
-      websites,
-      profile.name,
-      profile.companyName,
-      profile.designation,
-      email,
-      phoneNumber,
-      locationInfo,
-      socials,
-      whatsapp
-    )
-  );
+  button.addEventListener('click', () => {
+    window.location.href = '/profile/vcard/' + data.card.cardId;
+  });
 }
 
 function generateWebsites() {

@@ -1202,17 +1202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // }
 
   save_contact.addEventListener('click', () => {
-    createVCard(
-      websites,
-      name,
-      company,
-      designation,
-      email,
-      phoneNumber,
-      locationInfo,
-      socials,
-      whatsapp
-    );
+    window.location.href = '/profile/vcard/' + data.card.cardId;
   });
   console.log('play_games init');
   play_games.addEventListener('click', () => {

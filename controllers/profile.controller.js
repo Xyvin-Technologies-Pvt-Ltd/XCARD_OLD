@@ -130,7 +130,7 @@ export const viewProfile = asyncHandler(async (req, res, next) => {
   } else if (profileTheme == 'aero&black') {
     res.render('sky-blue', { data: profile });
   } else if (profileTheme == 'restaturants') {
-    res.render('sienna', { data: profile , gamesEnabledPaths: gamesEnabledPaths});
+    res.render('sienna', { data: profile, gamesEnabledPaths: gamesEnabledPaths });
   } else {
     res.render('index', { data: profile });
   }
@@ -331,7 +331,7 @@ export const getIsGamesEnabled = async (req, res, next) => {
     const { profileId } = req.params;
 
     // Find the setting document that holds the gamesEnabledPaths
-    const setting = await Setting.findOne({_id: '64836d5124c08425ddd429fa'});
+    const setting = await Setting.findOne({ _id: '64836d5124c08425ddd429fa' });
     const gamesEnabledPaths = setting?.application?.gamesEnabledPaths || [];
     // console.log('gamesEnabledPaths', gamesEnabled);
     // Check if the profileId is in the gamesEnabledPaths array
@@ -342,7 +342,7 @@ export const getIsGamesEnabled = async (req, res, next) => {
       status: 'success',
       data: isGamesEnabled,
       // list: gamesEnabledPaths,
-      
+
     });
   } catch (error) {
     // Handle any errors that occur
@@ -356,7 +356,7 @@ export const enableGames = async (req, res, next) => {
     const { profileId } = req.params;
 
     // Find the setting document that holds the gamesEnabledPaths
-    const setting = await Setting.findOne({_id: '64836d5124c08425ddd429fa'});
+    const setting = await Setting.findOne({ _id: '64836d5124c08425ddd429fa' });
     let gamesEnabledPaths = setting?.application?.gamesEnabledPaths || [];
 
     // Check if the profileId already exists in the array
@@ -365,7 +365,7 @@ export const enableGames = async (req, res, next) => {
       gamesEnabledPaths.push(profileId);
 
       // Update the setting document with the new array
-      await Setting.updateOne({_id: '64836d5124c08425ddd429fa'},
+      await Setting.updateOne({ _id: '64836d5124c08425ddd429fa' },
         { $set: { "application.gamesEnabledPaths": gamesEnabledPaths } }
       );
     }
@@ -389,7 +389,7 @@ export const disableGames = async (req, res, next) => {
     const { profileId } = req.params;
 
     // Find the setting document that holds the gamesEnabledPaths
-    const setting = await Setting.findOne({_id: '64836d5124c08425ddd429fa'});
+    const setting = await Setting.findOne({ _id: '64836d5124c08425ddd429fa' });
     let gamesEnabledPaths = setting?.application?.gamesEnabledPaths || [];
 
     // Check if the profileId exists in the array
@@ -398,7 +398,7 @@ export const disableGames = async (req, res, next) => {
       gamesEnabledPaths = gamesEnabledPaths.filter(id => id !== profileId);
 
       // Update the setting document with the new array
-      await Setting.updateOne({_id: '64836d5124c08425ddd429fa'},
+      await Setting.updateOne({ _id: '64836d5124c08425ddd429fa' },
         { $set: { "application.gamesEnabledPaths": gamesEnabledPaths } }
       );
     }
@@ -425,7 +425,7 @@ export const disableGames = async (req, res, next) => {
  */
 export const downloadVCard = asyncHandler(async (req, res, next) => {
   const profile = await Profile.findOne({ 'card.cardId': req?.params?.id });
-  
+
   if (!profile) {
     return next(new ErrorResponse('Profile not found', 404));
   }
@@ -493,12 +493,32 @@ export const downloadVCard = asyncHandler(async (req, res, next) => {
       return `URL:${social.value}`;
     });
 
+  // Fetch profile picture and convert to Base64
+  let photoLine = '';
+  if (profile.profile?.profilePicture?.public) {
+    try {
+      const imageUrl = profile.profile.profilePicture.public;
+      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const buffer = Buffer.from(response.data, 'binary');
+      const base64Image = buffer.toString('base64');
+
+      // Determine image type (default to JPEG if not clearly PNG)
+      const isPng = imageUrl.toLowerCase().endsWith('.png');
+      const imageType = isPng ? 'PNG' : 'JPEG';
+
+      photoLine = `PHOTO;ENCODING=b;TYPE=${imageType}:${base64Image}`;
+    } catch (error) {
+      console.error('Error fetching profile picture for vCard:', error);
+    }
+  }
+
   const vcardData = [
     'BEGIN:VCARD',
     'VERSION:3.0',
     `N:${lastName};${firstName};;`,
     `FN:${name}`,
     `EMAIL;TYPE=WORK:${email || ''}`,
+    photoLine,
     `ORG:${profile.profile?.companyName || ''}`,
     `TITLE:${profile.profile?.designation || ''}`,
     `ADR;TYPE=WORK:;;${locationInfo.value.replace(/\n/g, ';') || locationInfo.street || ''};${locationInfo.pincode || ''}`,
@@ -508,11 +528,12 @@ export const downloadVCard = asyncHandler(async (req, res, next) => {
     ...(whatsapp ? [`X-SOCIALPROFILE;TYPE=whatsapp:${whatsapp}`] : []),
     ...newSocials,
     'END:VCARD',
-  ].join('\r\n');
+  ]
+    .filter(line => line !== '') // Remove empty photoLine if fetching failed
+    .join('\r\n');
 
-  // Set headers to open in native contact app (not download)
-  // Using text/x-vcard and inline disposition for better mobile support
+  // Set headers to open in native contact app or download with profile name
   res.setHeader('Content-Type', 'text/x-vcard; charset=utf-8');
-  res.setHeader('Content-Disposition', 'inline');
+  res.setHeader('Content-Disposition', `attachment; filename="${name.replace(/\s+/g, '_')}.vcf"`);
   res.send(vcardData);
 });
