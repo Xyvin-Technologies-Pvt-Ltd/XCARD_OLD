@@ -8,6 +8,7 @@
     "Ldev": "NODE_ENV=development nodemon --exec \"node --require ./polyfills/slowbuffer.cjs\" server.js",
     "dev": "nodemon --exec \"node --require ./polyfills/slowbuffer.cjs\" server.js",
     "postinstall": "node ./scripts/patch-buffer-equal.js",
+    "verify:firebase": "node --require ./polyfills/slowbuffer.cjs ./scripts/verify-firebase.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
