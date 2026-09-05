@@ -13,16 +13,15 @@ import { serviceAccount } from './configs/dev-xcard-firebase.js';
 import * as fs from 'fs';
 import winLogger from './middlewares/winston_logger.js';
 
-// Controller
+// Load env vars before anything that reads process.env
+dotenv.config({
+  path: process.env.NODE_ENV === 'production' ? '.env' : '.env',
+});
 
 // Initialize Firebase
 const firebaseapp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.BUCKET_URL,
-});
-// Load env vars
-dotenv.config({
-  path: process.env.NODE_ENV === 'production' ? '.env' : '.env',
 });
 
 // Connect to databases
