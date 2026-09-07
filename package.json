@@ -4,11 +4,9 @@
   "description": "xcard backend services for the main xcard application",
   "main": "server.js",
   "scripts": {
-    "start": "NODE_ENV=production nodemon --exec \"node --require ./polyfills/slowbuffer.cjs\" server.js",
-    "Ldev": "NODE_ENV=development nodemon --exec \"node --require ./polyfills/slowbuffer.cjs\" server.js",
-    "dev": "nodemon --exec \"node --require ./polyfills/slowbuffer.cjs\" server.js",
-    "postinstall": "node ./scripts/patch-buffer-equal.js",
-    "verify:firebase": "node --require ./polyfills/slowbuffer.cjs ./scripts/verify-firebase.js",
+    "start": "NODE_ENV=production & nodemon server",
+    "Ldev": "SET NODE_ENV=development & nodemon server",
+    "dev": "nodemon server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",
@@ -24,7 +22,7 @@
     "express": "^4.18.2",
     "firebase": "^9.19.1",
     "firebase-admin": "^11.5.0",
-    "jsonwebtoken": "^9.0.3",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
@@ -37,6 +35,7 @@
     "tesseract.js": "^5.0.5",
     "url-parse": "^1.5.10",
     "winston": "^3.13.0",
+    "xcard-backend": "file:",
     "xlsx": "^0.18.5"
   },
   "directories": {

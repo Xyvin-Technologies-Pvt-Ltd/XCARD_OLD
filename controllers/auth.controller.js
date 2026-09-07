@@ -22,7 +22,7 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     .then(async function (decodedToken) {
       // Token is valid, create a custom token for the user
       const uid = decodedToken.uid;
-      let user = await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         {
           uid: uid,
         },
@@ -32,36 +32,9 @@ export const loginUser = asyncHandler(async (req, res, next) => {
           },
         }
       );
-
-      // Fallback: match by phone if uid lookup missed (phone format / sync issues)
-      if (!user && decodedToken.phone_number) {
-        const phone = decodedToken.phone_number;
-        const phoneVariants = [
-          phone,
-          phone.replace(/^\+/, ''),
-          phone.startsWith('+') ? phone : `+${phone}`,
-        ];
-        user = await User.findOneAndUpdate(
-          { username: { $in: phoneVariants } },
-          {
-            uid,
-            $addToSet: { fcm_token: req.body.fcm_token },
-          },
-          { new: true }
-        );
-      }
-
-      if (!user) {
-        console.log('Login user not found in MongoDB', {
-          firebaseUid: uid,
-          phone: decodedToken.phone_number || null,
-        });
-        throw new Error('User not registered');
-      }
-
       let profiles, userProfile;
       // To show the users admin in drawer,
-      let profile = null;
+      let profile;
       if (user?.role == 'admin' || user?.role == 'super') {
         profiles = await Profile.findOne({ user: user.id });
       } else {
@@ -74,16 +47,14 @@ export const loginUser = asyncHandler(async (req, res, next) => {
         }).populate({
           path: 'group',
         });
+        // const adminUser = await User.findById(profiles[0].group?.groupAdmin);
+        // profile = await Profile.findOne({ user: adminUser._id });
+        // profile = await Profile.findOne({ user: user.id });
         userProfile = await Profile.findOne({ user: user.id }).populate({
           path: 'group',
         });
-        const adminUserId = userProfile?.group?.groupAdmin;
-        if (adminUserId) {
-          const adminUser = await User.findById(adminUserId);
-          if (adminUser) {
-            profile = await Profile.findOne({ user: adminUser._id });
-          }
-        }
+        const adminUser = await User.findById(userProfile.group?.groupAdmin);
+        profile = await Profile.findOne({ user: adminUser._id });
       }
 
       const token = user.getSignedJwtToken();
@@ -106,13 +77,10 @@ export const loginUser = asyncHandler(async (req, res, next) => {
       });
     })
     .catch(function (error) {
+      // Token is invalid, return an error
       console.log('Error while login--->', error);
-      const isUserMissing = error?.message === 'User not registered';
-      const message = {
-        success: isUserMissing ? 'User not registered' : 'Invalid Token',
-        error: error?.message || 'Login failed',
-      };
-      return res.status(isUserMissing ? 404 : 401).send({ success: false, message });
+      let message = { success: 'Invalid Token' };
+      return res.status(401).send({ success: false, message });
     });
 });
 
@@ -137,12 +105,9 @@ export const loginWithEmail = asyncHandler(async (req, res, next) => {
           },
         }
       );
-      if (!user) {
-        throw new Error('User not registered');
-      }
       let profiles, userProfile;
       // To show the users admin in drawer,
-      let profile = null;
+      let profile;
       if (user?.role == 'admin' || user?.role == 'super') {
         profiles = await Profile.findOne({ user: user.id });
       } else {
@@ -161,13 +126,8 @@ export const loginWithEmail = asyncHandler(async (req, res, next) => {
         userProfile = await Profile.findOne({ user: user.id }).populate({
           path: 'group',
         });
-        const adminUserId = userProfile?.group?.groupAdmin;
-        if (adminUserId) {
-          const adminUser = await User.findById(adminUserId);
-          if (adminUser) {
-            profile = await Profile.findOne({ user: adminUser._id });
-          }
-        }
+        const adminUser = await User.findById(userProfile.group?.groupAdmin);
+        profile = await Profile.findOne({ user: adminUser._id });
       }
 
       const token = user.getSignedJwtToken();
@@ -259,7 +219,7 @@ export const getUserSession = asyncHandler(async (req, res, next) => {
       .json({ success: false, message: 'User is disabled' });
   let profiles, userProfile;
   // To show the users admin in drawer,
-  let profile = null;
+  let profile;
   if (user?.role == 'admin' || user?.role == 'super') {
     profiles = await Profile.findOne({ user: user.id });
   } else {
@@ -276,13 +236,8 @@ export const getUserSession = asyncHandler(async (req, res, next) => {
     userProfile = await Profile.findOne({ user: user.id }).populate({
       path: 'group',
     });
-    const adminUserId = userProfile?.group?.groupAdmin;
-    if (adminUserId) {
-      const adminUser = await User.findById(adminUserId);
-      if (adminUser) {
-        profile = await Profile.findOne({ user: adminUser._id });
-      }
-    }
+    const adminUser = await User.findById(userProfile.group?.groupAdmin);
+    profile = await Profile.findOne({ user: adminUser._id });
   }
 
   let message = { success: 'User Fetched' };
