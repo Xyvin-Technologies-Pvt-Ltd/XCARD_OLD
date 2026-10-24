@@ -6,6 +6,23 @@ import Profile from '../models/Profile.js';
 import sendSMS from '../utils/sms.sender.js';
 
 /**
+ * Attach a device FCM token to a user. A device token belongs to one user at a
+ * time, so it is pulled from any other user first. Missing tokens are skipped.
+ */
+const attachFcmToken = async (user, fcmToken) => {
+  if (!user || !fcmToken) return user;
+  await User.updateMany(
+    { _id: { $ne: user._id }, fcm_token: fcmToken },
+    { $pull: { fcm_token: fcmToken } }
+  );
+  return User.findByIdAndUpdate(
+    user._id,
+    { $addToSet: { fcm_token: fcmToken } },
+    { new: true }
+  );
+};
+
+/**
  * @desc    Number Sign In User
  * @route   POST /api/v1/auth/login
  * @access  Private/User
@@ -22,16 +39,7 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     .then(async function (decodedToken) {
       // Token is valid, create a custom token for the user
       const uid = decodedToken.uid;
-      let user = await User.findOneAndUpdate(
-        {
-          uid: uid,
-        },
-        {
-          $addToSet: {
-            fcm_token: req.body.fcm_token,
-          },
-        }
-      );
+      let user = await User.findOne({ uid: uid });
 
       // Fallback: match by phone if uid lookup missed (phone format / sync issues)
       if (!user && decodedToken.phone_number) {
@@ -43,10 +51,7 @@ export const loginUser = asyncHandler(async (req, res, next) => {
         ];
         user = await User.findOneAndUpdate(
           { username: { $in: phoneVariants } },
-          {
-            uid,
-            $addToSet: { fcm_token: req.body.fcm_token },
-          },
+          { uid },
           { new: true }
         );
       }
@@ -58,6 +63,8 @@ export const loginUser = asyncHandler(async (req, res, next) => {
         });
         throw new Error('User not registered');
       }
+
+      user = await attachFcmToken(user, req.body.fcm_token);
 
       let profiles, userProfile;
       // To show the users admin in drawer,
@@ -127,19 +134,11 @@ export const loginWithEmail = asyncHandler(async (req, res, next) => {
     .then(async function (userRecord) {
       // Token is valid, create a custom token for the user
       const uid = userRecord.uid;
-      const user = await User.findOneAndUpdate(
-        {
-          uid: uid,
-        },
-        {
-          $addToSet: {
-            fcm_token: req.body.fcm_token,
-          },
-        }
-      );
+      let user = await User.findOne({ uid: uid });
       if (!user) {
         throw new Error('User not registered');
       }
+      user = await attachFcmToken(user, req.body.fcm_token);
       let profiles, userProfile;
       // To show the users admin in drawer,
       let profile = null;
