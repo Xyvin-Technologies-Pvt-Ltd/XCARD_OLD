@@ -17,9 +17,10 @@ const UserSchema = new mongoose.Schema(
     uid: String,
     // isDisabled: Boolean,
     isDisabled: { type: Boolean, default: false },
+    // Not unique: a unique index on an array breaks login when a device
+    // token is already stored on another user (E11000 duplicate key).
     fcm_token: {
       type: [String],
-      unique: true,
     },
   },
   { timestamps: true }
