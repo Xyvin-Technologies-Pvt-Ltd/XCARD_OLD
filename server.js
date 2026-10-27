@@ -9,8 +9,8 @@ import routes from './routes/index.js';
 import admin from 'firebase-admin';
 import bodyParser from 'body-parser';
 import errorMiddleware from './middlewares/error.middleware.js';
-import { serviceAccount } from './configs/dev-xcard-firebase.js';
 import * as fs from 'fs';
+import { loadFirebaseServiceAccount } from './configs/loadFirebaseSa.js';
 import winLogger from './middlewares/winston_logger.js';
 
 // Load env vars before anything that reads process.env
@@ -18,11 +18,25 @@ dotenv.config({
   path: process.env.NODE_ENV === 'production' ? '.env' : '.env',
 });
 
-// Initialize Firebase
+const { serviceAccount, source: firebaseSaSource } =
+  await loadFirebaseServiceAccount();
+if (serviceAccount.project_id && serviceAccount.project_id !== 'xcard-ee43c') {
+  console.warn(
+    `[WARN] Firebase service account project_id=${serviceAccount.project_id} — expected xcard-ee43c (loaded from ${firebaseSaSource})`
+  );
+}
+
+// Initialize Firebase (project xcard-ee43c)
+const storageBucketName = (process.env.BUCKET_URL || '')
+  .replace(/^gs:\/\//, '')
+  .replace(/\/$/, '');
 const firebaseapp = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.BUCKET_URL,
+  storageBucket: storageBucketName,
 });
+console.info(
+  `Firebase init: project=${serviceAccount.project_id} bucket=${storageBucketName} sa=${firebaseSaSource}`
+);
 
 // Connect to databases
 connectDB();

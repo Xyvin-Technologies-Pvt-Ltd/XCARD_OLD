@@ -4,3 +4,6 @@ node_modules
 .env.production
 .dev-xcard-firebase.js
 configs/dev-xcard-firebase.js
+configs/xcard-ee43c-firebase.json
+configs/firebase-adminsdk.json
+configs/*-firebase-adminsdk*.json

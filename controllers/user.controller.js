@@ -1522,34 +1522,33 @@ export const updateUserProfile = asyncHandler(async (req, res, next) => {
         }
       }
 
+      const $set = {
+        'card.theme': theme,
+        'profile.name': name,
+        'profile.designation': designation,
+        'profile.companyName': companyName,
+        'profile.bio': bio,
+      };
+      const banner = images?.find((obj) => obj.type === 'banner');
+      const picture = images?.find((obj) => obj.type === 'profile');
+      if (banner) $set['profile.profileBanner'] = banner;
+      if (picture) $set['profile.profilePicture'] = picture;
+
       const profile = await Profile.findOneAndUpdate(
         {
           user: req?.query?.user ?? req?.user?.id,
           _id: req?.query?.profile,
         },
-        {
-          $set: {
-            'card.theme': theme,
-            'profile.name': name,
-            'profile.designation': designation,
-            'profile.companyName': companyName,
-            'profile.bio': bio,
-            'profile.profileBanner': images?.find(
-              (obj) => obj.type === 'banner'
-            ),
-            'profile.profilePicture': images?.find(
-              (obj) => obj.type === 'profile'
-            ),
-          },
-        },
+        { $set },
         { upsert: true, new: true }
       );
       let message = { success: 'User Profile Updated' };
       return res.status(200).send({ success: true, message, data: profile });
     })
     .catch((err) => {
-      console.log(err);
-      return next(new ErrorResponse(`File upload failed ${err}`, 400));
+      console.error('[updateUserProfile] failed:', err);
+      const detail = err?.message || err?.errors?.[0]?.message || String(err);
+      return next(new ErrorResponse(`File upload failed: ${detail}`, 400));
     });
 });
 

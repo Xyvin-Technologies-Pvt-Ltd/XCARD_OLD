@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 import admin from 'firebase-admin';
-import { serviceAccount } from '../configs/dev-xcard-firebase.js';
+import { loadFirebaseServiceAccount } from '../configs/loadFirebaseSa.js';
 
 dotenv.config();
+
+const { serviceAccount } = await loadFirebaseServiceAccount();
 
 const results = {
   projectId: serviceAccount.project_id,
