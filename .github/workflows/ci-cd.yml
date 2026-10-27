@@ -102,4 +102,5 @@ jobs:
               -p 8000:8000 \
               --name XCARD_BACKEND \
               --env-file /home/ec2-user/xcard/.env/.env.production \
+              -v /home/ec2-user/xcard/.env/dev-xcard-firebase.js:/usr/src/app/configs/dev-xcard-firebase.js:ro \
               ${{ steps.login-ecr.outputs.registry }}/xcard:latest
