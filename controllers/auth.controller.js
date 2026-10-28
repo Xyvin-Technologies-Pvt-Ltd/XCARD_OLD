@@ -5,19 +5,41 @@ import ErrorResponse from '../utils/error.response.js';
 import Profile from '../models/Profile.js';
 import sendSMS from '../utils/sms.sender.js';
 
+// Upper bound on devices kept per user; oldest tokens are dropped first
+const MAX_FCM_TOKENS = 10;
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
- * Attach a device FCM token to a user. A device token belongs to one user at a
- * time, so it is pulled from any other user first. Missing tokens are skipped.
+ * Attach a device FCM token to a user, keeping one token per device.
+ * FCM tokens look like "<installationId>:<token>"; a newer token from the same
+ * installation replaces the old one. A token belongs to one user at a time, so
+ * it is pulled from any other user first. Missing tokens are skipped.
  */
 const attachFcmToken = async (user, fcmToken) => {
   if (!user || !fcmToken) return user;
+
   await User.updateMany(
     { _id: { $ne: user._id }, fcm_token: fcmToken },
     { $pull: { fcm_token: fcmToken } }
   );
+
+  // Drop this device's older tokens (and the token itself, re-added below)
+  const separator = fcmToken.indexOf(':');
+  const sameDevice =
+    separator > 0
+      ? {
+          $regex: `^${escapeRegex(fcmToken.slice(0, separator))}:`,
+        }
+      : fcmToken;
+  await User.updateOne(
+    { _id: user._id },
+    { $pull: { fcm_token: sameDevice } }
+  );
+
   return User.findByIdAndUpdate(
     user._id,
-    { $addToSet: { fcm_token: fcmToken } },
+    { $push: { fcm_token: { $each: [fcmToken], $slice: -MAX_FCM_TOKENS } } },
     { new: true }
   );
 };
