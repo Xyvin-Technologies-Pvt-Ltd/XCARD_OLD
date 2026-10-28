@@ -162,40 +162,67 @@ export const submitForm = asyncHandler(async (req, res, next) => {
     if (!profile || !profile.user) {
       throw new Error('Profile not found or user reference not available.');
     }
-    let payload = {};
-    const tokens = profile.user.fcm_token;
+    const tokens = (profile.user.fcm_token || []).filter(Boolean);
     const messaging = admin.messaging();
     const notificationStatus =
       profile.form.status == null ? 0 : profile.form.status;
-    console.log(notificationStatus);
-    await tokens.forEach(async (element) => {
-      payload = {
-        token: element,
-        notification: {
-          title: name,
-          body: `${email}\nPhone: ${phone}\n${message}`,
-          sound: 'default',
-        },
-        data: {
-          status: `${notificationStatus}`,
-          ...req.body,
-        },
-        android: {
-          priority: 'high',
-        },
-        apns: {
-          payload: {
-            aps: {
-              'content-available': true,
+
+    // FCM data values must be strings
+    const data = { status: `${notificationStatus}` };
+    for (const [key, value] of Object.entries(req.body)) {
+      if (value != null) {
+        data[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      }
+    }
+
+    // Send to every device; one bad token must not fail the request or crash
+    // the process (unhandled rejection)
+    const results = await Promise.allSettled(
+      tokens.map((token) =>
+        messaging.send({
+          token,
+          notification: {
+            title: name,
+            body: `${email}\nPhone: ${phone}\n${message}`,
+          },
+          data,
+          android: {
+            priority: 'high',
+            notification: { sound: 'default' },
+          },
+          apns: {
+            payload: {
+              aps: {
+                'content-available': true,
+                sound: 'default',
+              },
             },
           },
-          fcm_options: {},
-        },
-      };
-      await messaging.send(payload).then((message) => {
-        console.log('message sent');
-      });
+        })
+      )
+    );
+
+    // Remove tokens that are dead or belong to another Firebase project
+    const staleTokenCodes = [
+      'messaging/registration-token-not-registered',
+      'messaging/invalid-registration-token',
+      'messaging/mismatched-credential',
+    ];
+    const staleTokens = [];
+    results.forEach((result, i) => {
+      if (result.status === 'rejected') {
+        const code = result.reason?.code || result.reason?.errorInfo?.code;
+        console.log('FCM send failed', { code, message: result.reason?.message });
+        if (staleTokenCodes.includes(code)) staleTokens.push(tokens[i]);
+      }
     });
+    if (staleTokens.length) {
+      await User.updateOne(
+        { _id: profile.user._id },
+        { $pull: { fcm_token: { $in: staleTokens } } }
+      );
+    }
+
     res.status(200).json({ message: 'Form submission successful' });
   } catch (e) {
     console.log(e);
